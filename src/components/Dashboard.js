@@ -170,11 +170,10 @@ function TournamentsView({ players, results, tournaments, admin, onSave, onClear
                 </div>
               </div>
             ) : has ? (
-              <div className="lk-t-card-body">
-                {ranked.slice(0, 6).map((r) => (
+              <div className="lk-t-card-body" style={{ maxHeight: 320, overflowY: "auto" }}>
+                {ranked.map((r) => (
                   <div key={r.player} className="lk-result-row"><span className={`lk-result-rank ${r.rank === 1 ? "r1" : ""}`}>{r.rank}</span><span className="lk-result-player"><Avatar name={r.player} size={20} /><span className="lk-result-player-name">{r.player}</span></span><span className={`lk-result-score ${r.score < 0 ? "under" : ""}`}>{formatScore(r.score)}</span></div>
                 ))}
-                {ranked.length > 6 && <div className="lk-result-row" style={{ color: "hsl(var(--muted-foreground))", fontSize: 12 }}><span></span><span>+{ranked.length - 6} more</span><span></span></div>}
               </div>
             ) : <div className="lk-t-card-empty">{t.motif === "azalea" ? "Tee times pending." : t.motif === "wanamaker" ? "Pack a sweater." : t.motif === "stripes" ? "Bring sunscreen." : "Sea breezes ahead."}</div>}
             {admin && !isEditing && <div className="lk-t-card-cta"><button className="lk-btn lk-btn-outline lk-btn-sm" onClick={() => startEdit(t.id)}>{has ? "Edit scores" : "Enter scores"}</button></div>}
@@ -195,7 +194,7 @@ function PrizesView({ players, results, tournaments, currency, buyIn, seasonBuyI
     <>
       <div className="lk-prize-section"><h3>Per-<em>major</em> purse</h3><p className="sub">{currency}{tournamentPot} per major · 70/30 split</p>
         <div className="lk-prize-grid">{tournaments.map((t) => { const ranked = tRank[t.id]; const first = ranked?.find((r) => r.rank === 1); const second = ranked?.find((r) => r.rank === 2); return (
-          <div key={t.id} className="lk-prize-card"><div className="lk-prize-card-hd">{t.name}</div>{ranked ? (<><div className="lk-prize-row"><span className="name"><Avatar name={first.player} size={20} /> {first.player}</span><span className="lk-prize-amt gold">{currency}{(tournamentPot * 0.7).toFixed(0)}</span></div><div className="lk-prize-row"><span className="name"><Avatar name={second.player} size={20} /> {second.player}</span><span className="lk-prize-amt">{currency}{(tournamentPot * 0.3).toFixed(0)}</span></div></>) : <p className="lk-prize-pending">Pending — {t.month}</p>}</div>
+          <div key={t.id} className="lk-prize-card"><div className="lk-prize-card-hd" style={{ display: "flex", alignItems: "center", gap: 8 }}><Crest motif={t.motif} size={22} />{t.name}</div>{ranked ? (<><div className="lk-prize-row"><span className="name"><Avatar name={first.player} size={20} /> {first.player}</span><span className="lk-prize-amt gold">{currency}{(tournamentPot * 0.7).toFixed(0)}</span></div><div className="lk-prize-row"><span className="name"><Avatar name={second.player} size={20} /> {second.player}</span><span className="lk-prize-amt">{currency}{(tournamentPot * 0.3).toFixed(0)}</span></div></>) : <p className="lk-prize-pending">Pending — {t.month}</p>}</div>
         ); })}</div>
       </div>
       <div className="lk-prize-section"><h3><em>Season</em> purse</h3><p className="sub">{currency}{seasonPot} on the line · 70/30 split</p>
@@ -298,7 +297,7 @@ export default function Dashboard() {
         <header className="lk-header">
           <div className="lk-brand">
             <div className="lk-brand-mark"><svg width="18" height="18" viewBox="0 0 14 14"><line x1="4" y1="2" x2="4" y2="12.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" /><path d="M4 2.5 L11 4.2 L4 6 Z" fill="white" /><circle cx="4" cy="12.5" r="1" fill="white" /></svg></div>
-            <span className="lk-brand-name">Golf <em>Champs</em></span>
+            <span className="lk-brand-name">RC Golf <em>Champs</em></span>
             <span className="lk-brand-sub">{new Date().getFullYear()} season</span>
           </div>
           <div className="lk-header-actions">
