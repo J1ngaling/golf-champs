@@ -5,6 +5,8 @@ import { ref, onValue, set } from "firebase/database";
 import { db } from "@/lib/firebase";
 import { isAdmin, attemptLogin, logout } from "@/lib/auth";
 
+// ─── Constants ──────────────────────────────────────────────────────────────
+
 const TOURNAMENTS = [
   { id: "masters", name: "The Masters", short: "Masters", venue: "Augusta National", month: "April", motif: "azalea" },
   { id: "pga", name: "PGA Championship", short: "PGA", venue: "Quail Hollow", month: "May", motif: "wanamaker" },
@@ -13,6 +15,67 @@ const TOURNAMENTS = [
 ];
 
 const DEFAULT_PLAYERS = Array.from({ length: 16 }, (_, i) => `Player ${i + 1}`);
+
+// ─── Historical Data ────────────────────────────────────────────────────────
+
+const HISTORY = {
+  2025: {
+    players: ["Guy Jackson","James Booth","Paul Walsh","Rowan Jelley","Richard Dandridge","Paul Nel","Mike Hunt","Ian Armstrong","Wesley Verweij","Rowan Anderson","Thomas Fry","Julien Koch","George Nettleton","Ulrich Stark"],
+    currency: "€",
+    buyIn: 200,
+    seasonBuyIn: 200,
+    results: {
+      masters: [
+        { player: "Paul Walsh", score: -20 },{ player: "Rowan Anderson", score: -15 },{ player: "Richard Dandridge", score: -14 },{ player: "Mike Hunt", score: -7 },{ player: "James Booth", score: 1 },{ player: "Thomas Fry", score: 3 },{ player: "Ian Armstrong", score: 11 },{ player: "Rowan Jelley", score: 14 },{ player: "Julien Koch", score: 15 },{ player: "Paul Nel", score: 20 },{ player: "George Nettleton", score: 27 },{ player: "Guy Jackson", score: 47 },{ player: "Ulrich Stark", score: 73 },{ player: "Wesley Verweij", score: 74 },
+      ],
+      pga: [
+        { player: "George Nettleton", score: -23 },{ player: "Ian Armstrong", score: -21 },{ player: "Rowan Jelley", score: -16 },{ player: "Rowan Anderson", score: -16 },{ player: "Ulrich Stark", score: -15 },{ player: "Mike Hunt", score: -5 },{ player: "Guy Jackson", score: -2 },{ player: "Julien Koch", score: 1 },{ player: "James Booth", score: 8 },{ player: "Wesley Verweij", score: 19 },{ player: "Paul Walsh", score: 25 },{ player: "Paul Nel", score: 27 },{ player: "Richard Dandridge", score: 30 },{ player: "Thomas Fry", score: 41 },
+      ],
+      usopen: [
+        { player: "Julien Koch", score: -15 },{ player: "Mike Hunt", score: -10 },{ player: "Rowan Jelley", score: -7 },{ player: "Ian Armstrong", score: -6 },{ player: "Paul Walsh", score: -2 },{ player: "Richard Dandridge", score: -1 },{ player: "Paul Nel", score: 0 },{ player: "Rowan Anderson", score: 20 },{ player: "Wesley Verweij", score: 21 },{ player: "Guy Jackson", score: 26 },{ player: "Thomas Fry", score: 30 },{ player: "Ulrich Stark", score: 30 },{ player: "James Booth", score: 45 },{ player: "George Nettleton", score: 46 },
+      ],
+      open: [
+        { player: "Paul Nel", score: 21 },{ player: "Ian Armstrong", score: 23 },{ player: "Richard Dandridge", score: 23 },{ player: "Rowan Anderson", score: 24 },{ player: "Paul Walsh", score: 26 },{ player: "George Nettleton", score: 31 },{ player: "Wesley Verweij", score: 42 },{ player: "Mike Hunt", score: 44 },{ player: "Ulrich Stark", score: 48 },{ player: "Julien Koch", score: 52 },{ player: "Rowan Jelley", score: 54 },{ player: "James Booth", score: 59 },{ player: "Thomas Fry", score: 60 },{ player: "Guy Jackson", score: 82 },
+      ],
+    },
+    winners: {
+      masters: { first: "Paul Walsh", second: "Rowan Anderson" },
+      pga: { first: "George Nettleton", second: "Ian Armstrong" },
+      usopen: { first: "Julien Koch", second: "Mike Hunt" },
+      open: { first: "Paul Nel", second: "Ian Armstrong" },
+      season: { first: "Mike Hunt", second: "Ian Armstrong" },
+    },
+  },
+  2024: {
+    players: ["Dale Huddy","Ulrich Stark","Julien Koch","Peter Lovemore","Byron Cornish","Rowan Jelley","Guy Jackson","Wesley Verweij","George Nettleton","Paul Walsh","James Booth","Richard Dandridge","Rowan Anderson","Michael Hunt","Paul Nel","Rob T","Simon Clayton","Gordon Cragg","Thomas Fry","Ian Armstrong","Nick Louw"],
+    currency: "R",
+    buyIn: 1000,
+    seasonBuyIn: 1000,
+    results: {
+      masters: [
+        { player: "Rowan Jelley", score: -11 },{ player: "Byron Cornish", score: -7 },{ player: "Thomas Fry", score: -5 },{ player: "Michael Hunt", score: -1 },{ player: "Nick Louw", score: -1 },{ player: "Rowan Anderson", score: -1 },{ player: "Julien Koch", score: 1 },{ player: "George Nettleton", score: 1 },{ player: "Richard Dandridge", score: 6 },{ player: "Guy Jackson", score: 9 },{ player: "Wesley Verweij", score: 9 },{ player: "Ian Armstrong", score: 10 },{ player: "Gordon Cragg", score: 11 },{ player: "Paul Nel", score: 19 },{ player: "Paul Walsh", score: 24 },{ player: "Rob T", score: 27 },{ player: "Simon Clayton", score: 33 },{ player: "Ulrich Stark", score: 33 },{ player: "James Booth", score: 48 },{ player: "Dale Huddy", score: 51 },{ player: "Peter Lovemore", score: 53 },
+      ],
+      pga: [
+        { player: "Paul Nel", score: -56 },{ player: "Byron Cornish", score: -51 },{ player: "Guy Jackson", score: -51 },{ player: "Nick Louw", score: -48 },{ player: "George Nettleton", score: -43 },{ player: "Paul Walsh", score: -40 },{ player: "Michael Hunt", score: -40 },{ player: "Thomas Fry", score: -40 },{ player: "Ulrich Stark", score: -32 },{ player: "Julien Koch", score: -25 },{ player: "Gordon Cragg", score: -20 },{ player: "Rowan Anderson", score: -17 },{ player: "Ian Armstrong", score: -15 },{ player: "James Booth", score: -14 },{ player: "Dale Huddy", score: -13 },{ player: "Rowan Jelley", score: -12 },{ player: "Rob T", score: -11 },{ player: "Simon Clayton", score: -9 },{ player: "Peter Lovemore", score: -8 },{ player: "Wesley Verweij", score: -8 },{ player: "Richard Dandridge", score: 14 },
+      ],
+      usopen: [
+        { player: "Paul Nel", score: 17 },{ player: "Rowan Anderson", score: 17 },{ player: "James Booth", score: 22 },{ player: "Guy Jackson", score: 26 },{ player: "Thomas Fry", score: 36 },{ player: "Michael Hunt", score: 37 },{ player: "Julien Koch", score: 37 },{ player: "Gordon Cragg", score: 37 },{ player: "Dale Huddy", score: 38 },{ player: "Simon Clayton", score: 39 },{ player: "Paul Walsh", score: 39 },{ player: "Nick Louw", score: 39 },{ player: "Wesley Verweij", score: 40 },{ player: "Rowan Jelley", score: 41 },{ player: "Byron Cornish", score: 43 },{ player: "Rob T", score: 46 },{ player: "Richard Dandridge", score: 46 },{ player: "Ian Armstrong", score: 51 },{ player: "George Nettleton", score: 70 },{ player: "Ulrich Stark", score: 71 },{ player: "Peter Lovemore", score: 71 },
+      ],
+      open: [
+        { player: "Michael Hunt", score: 25 },{ player: "Peter Lovemore", score: 29 },{ player: "Guy Jackson", score: 30 },{ player: "Paul Nel", score: 31 },{ player: "Simon Clayton", score: 38 },{ player: "Richard Dandridge", score: 57 },{ player: "Dale Huddy", score: 59 },{ player: "James Booth", score: 61 },{ player: "Gordon Cragg", score: 64 },{ player: "Julien Koch", score: 66 },{ player: "Wesley Verweij", score: 68 },{ player: "George Nettleton", score: 77 },{ player: "Ulrich Stark", score: 82 },{ player: "Paul Walsh", score: 90 },{ player: "Rowan Jelley", score: 90 },{ player: "Ian Armstrong", score: 90 },{ player: "Rob T", score: 92 },{ player: "Thomas Fry", score: 93 },{ player: "Byron Cornish", score: 95 },{ player: "Rowan Anderson", score: 99 },{ player: "Nick Louw", score: 99 },
+      ],
+    },
+    winners: {
+      masters: { first: "Rowan Jelley", second: "Byron Cornish" },
+      pga: { first: "Paul Nel", second: "Byron Cornish / Guy Jackson" },
+      usopen: { first: "Paul Nel", second: "Rowan Anderson" },
+      open: { first: "Michael Hunt", second: "Peter Lovemore" },
+      season: { first: "Michael Hunt", second: "Guy Jackson" },
+    },
+  },
+};
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function rankResults(entries) {
   if (!entries || entries.length === 0) return [];
@@ -34,43 +97,18 @@ function inits(name) {
   return name.split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase();
 }
 
+// ─── Atoms ──────────────────────────────────────────────────────────────────
+
 function Avatar({ name, size = 24 }) {
   return <span className="lk-avatar" style={{ width: size, height: size, fontSize: size * 0.4 }} aria-label={name}>{inits(name)}</span>;
 }
 
 function Crest({ motif, size = 32 }) {
-  const c = "hsl(var(--primary))";
-  const a = "hsl(var(--gold))";
-  const r = "hsl(var(--azalea))";
-  const cl = "hsl(var(--claret))";
-  if (motif === "azalea") return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="14" fill="none" stroke={c} strokeWidth="0.7" opacity="0.5"/>
-      {[0,72,144,216,288].map(d => <ellipse key={d} cx="16" cy="9" rx="3.2" ry="5" fill={r} opacity="0.85" transform={`rotate(${d} 16 16)`}/>)}
-      <circle cx="16" cy="16" r="2" fill={a}/>
-    </svg>
-  );
-  if (motif === "wanamaker") return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="13" fill="none" stroke={c} strokeWidth="0.7" opacity="0.5"/>
-      <circle cx="16" cy="16" r="9" fill="none" stroke={c} strokeWidth="0.7" opacity="0.4"/>
-      <path d="M16 7 L18 14 L25 14 L19.5 18 L21.5 25 L16 21 L10.5 25 L12.5 18 L7 14 L14 14 Z" fill={a} opacity="0.9"/>
-    </svg>
-  );
-  if (motif === "stripes") return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="14" fill="none" stroke={c} strokeWidth="0.7" opacity="0.5"/>
-      <rect x="6" y="9" width="20" height="2" fill={cl}/><rect x="6" y="13" width="20" height="2" fill={cl}/>
-      <rect x="6" y="17" width="20" height="2" fill={cl}/><rect x="6" y="21" width="20" height="2" fill={cl}/>
-    </svg>
-  );
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="14" fill="none" stroke={c} strokeWidth="0.7" opacity="0.5"/>
-      <path d="M3 22 Q9 15 14 19 T26 17 L29 22 L29 26 L3 26 Z" fill={c} opacity="0.7"/>
-      <circle cx="22" cy="9" r="2.4" fill={a}/>
-    </svg>
-  );
+  const c = "hsl(var(--primary))"; const a = "hsl(var(--gold))"; const r = "hsl(var(--azalea))"; const cl = "hsl(var(--claret))";
+  if (motif === "azalea") return (<svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke={c} strokeWidth="0.7" opacity="0.5"/>{[0,72,144,216,288].map(d => <ellipse key={d} cx="16" cy="9" rx="3.2" ry="5" fill={r} opacity="0.85" transform={`rotate(${d} 16 16)`}/>)}<circle cx="16" cy="16" r="2" fill={a}/></svg>);
+  if (motif === "wanamaker") return (<svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke={c} strokeWidth="0.7" opacity="0.5"/><circle cx="16" cy="16" r="9" fill="none" stroke={c} strokeWidth="0.7" opacity="0.4"/><path d="M16 7 L18 14 L25 14 L19.5 18 L21.5 25 L16 21 L10.5 25 L12.5 18 L7 14 L14 14 Z" fill={a} opacity="0.9"/></svg>);
+  if (motif === "stripes") return (<svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke={c} strokeWidth="0.7" opacity="0.5"/><rect x="6" y="9" width="20" height="2" fill={cl}/><rect x="6" y="13" width="20" height="2" fill={cl}/><rect x="6" y="17" width="20" height="2" fill={cl}/><rect x="6" y="21" width="20" height="2" fill={cl}/></svg>);
+  return (<svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke={c} strokeWidth="0.7" opacity="0.5"/><path d="M3 22 Q9 15 14 19 T26 17 L29 22 L29 26 L3 26 Z" fill={c} opacity="0.7"/><circle cx="22" cy="9" r="2.4" fill={a}/></svg>);
 }
 
 function Move({ delta }) {
@@ -79,110 +117,76 @@ function Move({ delta }) {
   return <span className="lk-move lk-move-down"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8 L9 2 L1 2 Z" fill="currentColor"/></svg>{Math.abs(delta)}</span>;
 }
 
+// ─── Toast ──────────────────────────────────────────────────────────────────
+
 const ToastCtx = createContext(null);
 function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
-  const push = (msg) => {
-    const id = Math.random().toString(36).slice(2);
-    setToasts((t) => [...t, { id, msg }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2400);
-  };
-  return (
-    <ToastCtx.Provider value={push}>
-      {children}
-      <div className="lk-toast-wrap" aria-live="polite">
-        {toasts.map((t) => (
-          <div key={t.id} className="lk-toast" role="status">
-            <span className="check"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5 L4.2 7 L8 3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
-            {t.msg}
-          </div>
-        ))}
-      </div>
-    </ToastCtx.Provider>
-  );
+  const push = (msg) => { const id = Math.random().toString(36).slice(2); setToasts((t) => [...t, { id, msg }]); setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2400); };
+  return (<ToastCtx.Provider value={push}>{children}<div className="lk-toast-wrap" aria-live="polite">{toasts.map((t) => (<div key={t.id} className="lk-toast" role="status"><span className="check"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5 L4.2 7 L8 3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg></span>{t.msg}</div>))}</div></ToastCtx.Provider>);
 }
 const useToast = () => useContext(ToastCtx);
 
+// ─── Standings ──────────────────────────────────────────────────────────────
+
 function StandingsView({ players, results, tournaments }) {
-  const tRank = {};
-  tournaments.forEach((t) => { if (results[t.id]) tRank[t.id] = rankResults(results[t.id]); });
+  const tRank = {}; tournaments.forEach((t) => { if (results[t.id]) tRank[t.id] = rankResults(results[t.id]); });
   const standings = players.map((player) => {
     let totalRank = 0, played = 0; const ranks = {}; const wins = [];
-    tournaments.forEach((t) => {
-      const tr = tRank[t.id];
-      if (tr) { const e = tr.find((r) => r.player === player); if (e) { totalRank += e.rank; played++; ranks[t.id] = e.rank; if (e.rank === 1) wins.push(t); } }
-    });
+    tournaments.forEach((t) => { const tr = tRank[t.id]; if (tr) { const e = tr.find((r) => r.player === player); if (e) { totalRank += e.rank; played++; ranks[t.id] = e.rank; if (e.rank === 1) wins.push(t); } } });
     return { player, totalRank, played, ranks, wins };
   }).filter((s) => s.played > 0);
   standings.sort((a, b) => a.played !== b.played ? b.played - a.played : a.totalRank - b.totalRank);
   let sr = 1;
-  const ranked = standings.map((s, i) => {
-    if (i > 0 && (s.totalRank > standings[i - 1].totalRank || s.played < standings[i - 1].played)) sr = i + 1;
-    return { ...s, seasonRank: sr };
-  });
+  const ranked = standings.map((s, i) => { if (i > 0 && (s.totalRank > standings[i - 1].totalRank || s.played < standings[i - 1].played)) sr = i + 1; return { ...s, seasonRank: sr }; });
   if (ranked.length === 0) return <div className="lk-empty"><p>No results yet</p><span>Standings appear after the first major.</span></div>;
   return (
     <div className="lk-card">
       <div className="lk-card-hd"><div><h3 className="lk-card-title"><em>Season</em> Standings</h3><p className="lk-card-desc">Lowest cumulative rank across the four majors wins.</p></div></div>
-      <table className="lk-table">
-        <thead><tr><th style={{ width: 48 }}>#</th><th>Player</th>{tournaments.map((t) => <th key={t.id} className="center" title={t.name} style={{ width: 56 }}>{t.short}</th>)}<th className="right" style={{ width: 60 }}>Total</th><th className="center" style={{ width: 56 }}>Δ</th></tr></thead>
+      <table className="lk-table"><thead><tr><th style={{ width: 48 }}>#</th><th>Player</th>{tournaments.map((t) => <th key={t.id} className="center" title={t.name} style={{ width: 56 }}>{t.short}</th>)}<th className="right" style={{ width: 60 }}>Total</th><th className="center" style={{ width: 56 }}>Δ</th></tr></thead>
         <tbody>{ranked.map((s) => (
           <tr key={s.player} className={s.seasonRank <= 3 ? `podium-${s.seasonRank}` : ""}>
             <td className="lk-td-rank">{s.seasonRank === 1 ? <span className="lk-td-rank-seal">1</span> : s.seasonRank}</td>
             <td><div className="lk-td-player"><Avatar name={s.player} size={28} /><div><div className="lk-td-player-name">{s.player}{s.wins.length > 0 && <span className="lk-td-wins">{s.wins.map((w) => <span key={w.id} className="lk-td-win" title={`Won ${w.name}`}><Crest motif={w.motif} size={18} /></span>)}</span>}</div></div></div></td>
             {tournaments.map((t) => <td key={t.id} className="lk-td-major">{s.ranks[t.id] != null ? <span className={`lk-rank-badge ${s.ranks[t.id] === 1 ? "r1" : ""}`}>{s.ranks[t.id]}</span> : <span className="lk-dash">—</span>}</td>)}
-            <td className="lk-td-total">{s.totalRank}</td>
-            <td className="lk-td-move"><Move delta={null} /></td>
+            <td className="lk-td-total">{s.totalRank}</td><td className="lk-td-move"><Move delta={null} /></td>
           </tr>
-        ))}</tbody>
-      </table>
+        ))}</tbody></table>
     </div>
   );
 }
 
+// ─── Tournaments ────────────────────────────────────────────────────────────
+
 function TournamentsView({ players, results, tournaments, admin, onSave, onClear }) {
-  const [editingT, setEditingT] = useState(null);
-  const [scores, setScores] = useState({});
-  const toast = useToast();
+  const [editingT, setEditingT] = useState(null); const [scores, setScores] = useState({}); const toast = useToast();
   const tRank = useMemo(() => { const o = {}; tournaments.forEach((t) => { if (results[t.id]) o[t.id] = rankResults(results[t.id]); }); return o; }, [tournaments, results]);
   const startEdit = (id) => { const existing = results[id]; const s = {}; players.forEach((p) => { const e = existing?.find((r) => r.player === p); s[p] = e ? String(e.score) : ""; }); setScores(s); setEditingT(id); };
   const save = () => { const entries = Object.entries(scores).filter(([, v]) => v !== "" && !isNaN(Number(v))).map(([player, score]) => ({ player, score: Number(score) })); onSave(editingT, entries); const t = tournaments.find(x => x.id === editingT); setEditingT(null); if (toast) toast(`${t?.short} saved`); };
   return (
-    <div className="lk-t-grid">
-      {tournaments.map((t) => {
-        const has = !!results[t.id]; const ranked = tRank[t.id] || []; const isEditing = editingT === t.id;
-        return (
-          <article key={t.id} className="lk-t-card">
-            <header className="lk-t-card-hd">
-              <div><h3 className="lk-t-card-title">{t.name}</h3><div className="lk-t-card-meta">{t.venue} · {t.month}</div></div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Crest motif={t.motif} /><span className={`lk-badge ${has ? "lk-badge-primary" : ""}`}>{has && <span className="dot" />}{has ? "Final" : "Upcoming"}</span></div>
-            </header>
-            {isEditing ? (
-              <div className="lk-entry">
-                <div className="lk-entry-cap"><span>Scorecard · {t.short}</span><span className="hand">marker&apos;s pen</span></div>
-                <div className="lk-entry-grid">{players.map((p) => (
-                  <div key={p} className="lk-entry-row"><label htmlFor={`s-${t.id}-${p}`}><Avatar name={p} size={20} /><span>{p}</span></label>
-                  <input id={`s-${t.id}-${p}`} type="number" className="lk-input lk-input-hand" placeholder="—" value={scores[p] || ""} onChange={(e) => setScores({ ...scores, [p]: e.target.value })} /></div>
-                ))}</div>
-                <div style={{ display: "flex", gap: 8, marginTop: 16, paddingTop: 14, borderTop: "1px solid hsl(var(--border))" }}>
-                  {has && <button className="lk-btn lk-btn-destructive lk-btn-sm" onClick={() => { onClear(t.id); setEditingT(null); if (toast) toast(`${t.short} cleared`); }}>Clear scores</button>}
-                  <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}><button className="lk-btn lk-btn-ghost lk-btn-sm" onClick={() => setEditingT(null)}>Cancel</button><button className="lk-btn lk-btn-primary lk-btn-sm" onClick={save}>Save scores</button></div>
-                </div>
-              </div>
-            ) : has ? (
-              <div className="lk-t-card-body" style={{ maxHeight: 320, overflowY: "auto" }}>
-                {ranked.map((r) => (
-                  <div key={r.player} className="lk-result-row"><span className={`lk-result-rank ${r.rank === 1 ? "r1" : ""}`}>{r.rank}</span><span className="lk-result-player"><Avatar name={r.player} size={20} /><span className="lk-result-player-name">{r.player}</span></span><span className={`lk-result-score ${r.score < 0 ? "under" : ""}`}>{formatScore(r.score)}</span></div>
-                ))}
-              </div>
-            ) : <div className="lk-t-card-empty">{t.motif === "azalea" ? "Tee times pending." : t.motif === "wanamaker" ? "Pack a sweater." : t.motif === "stripes" ? "Bring sunscreen." : "Sea breezes ahead."}</div>}
-            {admin && !isEditing && <div className="lk-t-card-cta"><button className="lk-btn lk-btn-outline lk-btn-sm" onClick={() => startEdit(t.id)}>{has ? "Edit scores" : "Enter scores"}</button></div>}
-          </article>
-        );
-      })}
-    </div>
+    <div className="lk-t-grid">{tournaments.map((t) => {
+      const has = !!results[t.id]; const ranked = tRank[t.id] || []; const isEditing = editingT === t.id;
+      return (
+        <article key={t.id} className="lk-t-card">
+          <header className="lk-t-card-hd"><div><h3 className="lk-t-card-title">{t.name}</h3><div className="lk-t-card-meta">{t.venue} · {t.month}</div></div><div style={{ display: "flex", alignItems: "center", gap: 10 }}><Crest motif={t.motif} /><span className={`lk-badge ${has ? "lk-badge-primary" : ""}`}>{has && <span className="dot" />}{has ? "Final" : "Upcoming"}</span></div></header>
+          {isEditing ? (
+            <div className="lk-entry"><div className="lk-entry-cap"><span>Scorecard · {t.short}</span><span className="hand">marker&apos;s pen</span></div>
+              <div className="lk-entry-grid">{players.map((p) => (<div key={p} className="lk-entry-row"><label htmlFor={`s-${t.id}-${p}`}><Avatar name={p} size={20} /><span>{p}</span></label><input id={`s-${t.id}-${p}`} type="number" className="lk-input lk-input-hand" placeholder="—" value={scores[p] || ""} onChange={(e) => setScores({ ...scores, [p]: e.target.value })} /></div>))}</div>
+              <div style={{ display: "flex", gap: 8, marginTop: 16, paddingTop: 14, borderTop: "1px solid hsl(var(--border))" }}>{has && <button className="lk-btn lk-btn-destructive lk-btn-sm" onClick={() => { onClear(t.id); setEditingT(null); if (toast) toast(`${t.short} cleared`); }}>Clear scores</button>}<div style={{ marginLeft: "auto", display: "flex", gap: 8 }}><button className="lk-btn lk-btn-ghost lk-btn-sm" onClick={() => setEditingT(null)}>Cancel</button><button className="lk-btn lk-btn-primary lk-btn-sm" onClick={save}>Save scores</button></div></div>
+            </div>
+          ) : has ? (
+            <div className="lk-t-card-body" style={{ maxHeight: 320, overflowY: "auto" }}>{ranked.map((r) => (
+              <div key={r.player} className="lk-result-row"><span className={`lk-result-rank ${r.rank === 1 ? "r1" : ""}`}>{r.rank}</span><span className="lk-result-player"><Avatar name={r.player} size={20} /><span className="lk-result-player-name">{r.player}</span></span><span className={`lk-result-score ${r.score < 0 ? "under" : ""}`}>{formatScore(r.score)}</span></div>
+            ))}</div>
+          ) : <div className="lk-t-card-empty">{t.motif === "azalea" ? "Tee times pending." : t.motif === "wanamaker" ? "Pack a sweater." : t.motif === "stripes" ? "Bring sunscreen." : "Sea breezes ahead."}</div>}
+          {admin && !isEditing && <div className="lk-t-card-cta"><button className="lk-btn lk-btn-outline lk-btn-sm" onClick={() => startEdit(t.id)}>{has ? "Edit scores" : "Enter scores"}</button></div>}
+        </article>
+      );
+    })}</div>
   );
 }
+
+// ─── Prizes ─────────────────────────────────────────────────────────────────
 
 function PrizesView({ players, results, tournaments, currency, buyIn, seasonBuyIn }) {
   const tournamentPot = buyIn * players.length; const seasonPot = seasonBuyIn * players.length;
@@ -208,6 +212,123 @@ function PrizesView({ players, results, tournaments, currency, buyIn, seasonBuyI
   );
 }
 
+// ─── History ────────────────────────────────────────────────────────────────
+
+function HistoryView() {
+  const [selectedYear, setSelectedYear] = useState(2025);
+  const [expandedT, setExpandedT] = useState(null);
+  const data = HISTORY[selectedYear];
+  if (!data) return null;
+
+  const tRank = {};
+  TOURNAMENTS.forEach((t) => { if (data.results[t.id]) tRank[t.id] = rankResults(data.results[t.id]); });
+
+  // Season standings
+  const standings = data.players.map((player) => {
+    let totalRank = 0, played = 0; const ranks = {};
+    TOURNAMENTS.forEach((t) => { const tr = tRank[t.id]; if (tr) { const e = tr.find((r) => r.player === player); if (e) { totalRank += e.rank; played++; ranks[t.id] = e.rank; } } });
+    return { player, totalRank, played, ranks };
+  }).filter((s) => s.played > 0);
+  standings.sort((a, b) => a.played !== b.played ? b.played - a.played : a.totalRank - b.totalRank);
+  let sr = 1;
+  const ranked = standings.map((s, i) => { if (i > 0 && (s.totalRank > standings[i - 1].totalRank || s.played < standings[i - 1].played)) sr = i + 1; return { ...s, seasonRank: sr }; });
+
+  const w = data.winners;
+
+  return (
+    <div>
+      {/* Year selector */}
+      <div style={{ marginBottom: 20 }}>
+        <div className="lk-toggle-group" role="group" aria-label="Year">
+          {Object.keys(HISTORY).sort((a, b) => Number(b) - Number(a)).map((y) => (
+            <button key={y} className={`lk-toggle ${selectedYear === Number(y) ? "active" : ""}`} onClick={() => { setSelectedYear(Number(y)); setExpandedT(null); }}>{y}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Season champion */}
+      <div className="lk-card" style={{ marginBottom: 20 }}>
+        <div className="lk-card-hd"><div><h3 className="lk-card-title"><em>{selectedYear}</em> Season Champions</h3></div></div>
+        <div style={{ padding: "16px 22px" }}>
+          <div className="lk-season-prize-row" style={{ borderTop: "none", paddingTop: 4 }}>
+            <span className="lk-season-prize-place first">1st</span>
+            <div><div className="lk-season-prize-name"><Avatar name={w.season.first} size={24} /> <span style={{ marginLeft: 8 }}>{w.season.first}</span></div></div>
+            <span className="lk-badge lk-badge-primary">Season Champion</span>
+          </div>
+          <div className="lk-season-prize-row">
+            <span className="lk-season-prize-place">2nd</span>
+            <div><div className="lk-season-prize-name"><Avatar name={w.season.second} size={24} /> <span style={{ marginLeft: 8 }}>{w.season.second}</span></div></div>
+            <span className="lk-badge">Runner-up</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Final standings table */}
+      <div className="lk-card" style={{ marginBottom: 20 }}>
+        <div className="lk-card-hd"><div><h3 className="lk-card-title">Final <em>Standings</em></h3><p className="lk-card-desc">{data.players.length} players · {data.currency} season</p></div></div>
+        <div style={{ overflowX: "auto" }}>
+          <table className="lk-table"><thead><tr><th style={{ width: 48 }}>#</th><th>Player</th>{TOURNAMENTS.map((t) => <th key={t.id} className="center" style={{ width: 56 }}>{t.short}</th>)}<th className="right" style={{ width: 60 }}>Total</th></tr></thead>
+            <tbody>{ranked.map((s) => (
+              <tr key={s.player} className={s.seasonRank <= 3 ? `podium-${s.seasonRank}` : ""}>
+                <td className="lk-td-rank">{s.seasonRank === 1 ? <span className="lk-td-rank-seal">1</span> : s.seasonRank}</td>
+                <td><div className="lk-td-player"><Avatar name={s.player} size={24} /><div><div className="lk-td-player-name">{s.player}</div></div></div></td>
+                {TOURNAMENTS.map((t) => <td key={t.id} className="lk-td-major">{s.ranks[t.id] != null ? <span className={`lk-rank-badge ${s.ranks[t.id] === 1 ? "r1" : ""}`}>{s.ranks[t.id]}</span> : <span className="lk-dash">—</span>}</td>)}
+                <td className="lk-td-total">{s.totalRank}</td>
+              </tr>
+            ))}</tbody></table>
+        </div>
+      </div>
+
+      {/* Major results */}
+      <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 500, margin: "0 0 14px", color: "hsl(var(--foreground))" }}>Major <em style={{ fontStyle: "italic", fontWeight: 400, color: "hsl(var(--primary))" }}>Results</em></h3>
+      <div className="lk-t-grid">
+        {TOURNAMENTS.map((t) => {
+          const ranked = tRank[t.id] || [];
+          const isExpanded = expandedT === t.id;
+          if (ranked.length === 0) return null;
+          return (
+            <article key={t.id} className="lk-t-card">
+              <header className="lk-t-card-hd">
+                <div><h3 className="lk-t-card-title">{t.name}</h3><div className="lk-t-card-meta">{t.month} {selectedYear}</div></div>
+                <Crest motif={t.motif} />
+              </header>
+              <div className="lk-t-card-body" style={{ maxHeight: isExpanded ? "none" : 220, overflowY: isExpanded ? "visible" : "hidden", position: "relative" }}>
+                {ranked.map((r) => (
+                  <div key={r.player} className="lk-result-row"><span className={`lk-result-rank ${r.rank === 1 ? "r1" : ""}`}>{r.rank}</span><span className="lk-result-player"><Avatar name={r.player} size={20} /><span className="lk-result-player-name">{r.player}</span></span><span className={`lk-result-score ${r.score < 0 ? "under" : ""}`}>{formatScore(r.score)}</span></div>
+                ))}
+              </div>
+              {ranked.length > 6 && (
+                <div className="lk-t-card-cta">
+                  <button className="lk-btn lk-btn-ghost lk-btn-sm" onClick={() => setExpandedT(isExpanded ? null : t.id)}>{isExpanded ? "Show less" : `Show all ${ranked.length}`}</button>
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+
+      {/* Major winners summary */}
+      <div className="lk-card" style={{ marginTop: 20 }}>
+        <div className="lk-card-hd"><div><h3 className="lk-card-title"><em>Major</em> Winners</h3></div></div>
+        <div style={{ padding: "12px 22px" }}>
+          {TOURNAMENTS.map((t) => {
+            const tw = w[t.id];
+            if (!tw) return null;
+            return (
+              <div key={t.id} className="lk-prize-row">
+                <span className="name" style={{ gap: 10 }}><Crest motif={t.motif} size={20} /> {t.name}</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 500, color: "hsl(var(--primary))" }}>{tw.first}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Settings ───────────────────────────────────────────────────────────────
+
 function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate }) {
   const [editing, setEditing] = useState(false); const [draft, setDraft] = useState(players.join("\n"));
   const tournamentPot = buyIn * players.length; const seasonPot = seasonBuyIn * players.length;
@@ -226,6 +347,8 @@ function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate }) {
   );
 }
 
+// ─── PIN Dialog ─────────────────────────────────────────────────────────────
+
 function PinDialog({ onClose, onLogin }) {
   const [pin, setPin] = useState(""); const [err, setErr] = useState(""); const inputRef = useRef(null);
   useEffect(() => { inputRef.current?.focus(); }, []);
@@ -240,6 +363,8 @@ function PinDialog({ onClose, onLogin }) {
     </div></div>
   );
 }
+
+// ─── Main App ───────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
   const [players, setPlayers] = useState(DEFAULT_PLAYERS);
@@ -322,7 +447,7 @@ export default function Dashboard() {
         {settingsOpen && admin && <SettingsDrawer players={players} currency={currency} buyIn={buyIn} seasonBuyIn={seasonBuyIn} onUpdate={updateConfig} />}
 
         <div className="lk-tabs-list" role="tablist">
-          {[{ id: "standings", label: "Standings" }, { id: "tournaments", label: "Majors", badge: `${completed}/4` }, { id: "prizes", label: "Purse" }].map((tab) => (
+          {[{ id: "standings", label: "Standings" }, { id: "tournaments", label: "Majors", badge: `${completed}/4` }, { id: "prizes", label: "Purse" }, { id: "history", label: "History" }].map((tab) => (
             <button key={tab.id} role="tab" aria-selected={view === tab.id} className={`lk-tab ${view === tab.id ? "active" : ""}`} onClick={() => setView(tab.id)}>
               {tab.label}{tab.badge && view !== tab.id && <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", fontVariantNumeric: "tabular-nums" }}>{tab.badge}</span>}
             </button>
@@ -333,6 +458,7 @@ export default function Dashboard() {
           {view === "standings" && <StandingsView players={players} results={results} tournaments={TOURNAMENTS} />}
           {view === "tournaments" && <TournamentsView players={players} results={results} tournaments={TOURNAMENTS} admin={admin} onSave={handleSave} onClear={handleClear} />}
           {view === "prizes" && <PrizesView players={players} results={results} tournaments={TOURNAMENTS} currency={currency} buyIn={buyIn} seasonBuyIn={seasonBuyIn} />}
+          {view === "history" && <HistoryView />}
         </main>
       </div>
     </div></ToastProvider>
