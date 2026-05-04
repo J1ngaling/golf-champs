@@ -371,7 +371,7 @@ export default function Dashboard() {
       <div className="lk-shell">
         <header className="lk-header">
           <div className="lk-brand">
-            <img src="/rcgc-logo.png" alt="RCGC" style={{ height: 40, width: "auto" }} />
+            <img src="/rcgc-logo.png" alt="RCGC" style={{ height: 100, width: "auto" }} />
             <span className="lk-brand-name">RC Golf <em>Champs</em></span>
             <span className="lk-brand-sub">{new Date().getFullYear()} season</span>
           </div>
