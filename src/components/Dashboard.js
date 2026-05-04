@@ -23,31 +23,31 @@ const HISTORY = {
       { id: "usopen", name: "U.S. Open", short: "U.S. Open", month: "June", motif: "stripes" },
       { id: "open", name: "The Open", short: "The Open", month: "July", motif: "links" },
     ],
-    players: ["Guy Jackson","James Booth","Paul Walsh","Rowan Jelley","Richard Dandridge","Paul Nel","Mike Hunt","Ian Armstrong","Wesley Verweij","Rowan Anderson","Thomas Fry","Julien Koch","George Nettleton","Ulrich Stark"],
+    players: ["Guy Jackson","James Booth","Paul Walsh","Rowan Jelley","Richard Dandridge","Paul Nel","Michael Hunt","Ian Armstrong","Wesley Verweij","Rowan Anderson","Thomas Fry","Julien Koch","George Nettleton","Ulrich Stark"],
     results: {
       players: [
-        { player: "Paul Walsh", score: -20 },{ player: "Rowan Anderson", score: -15 },{ player: "Richard Dandridge", score: -14 },{ player: "Mike Hunt", score: -7 },{ player: "James Booth", score: 1 },{ player: "Thomas Fry", score: 3 },{ player: "Ian Armstrong", score: 11 },{ player: "Rowan Jelley", score: 14 },{ player: "Julien Koch", score: 15 },{ player: "Paul Nel", score: 20 },{ player: "George Nettleton", score: 27 },{ player: "Guy Jackson", score: 47 },{ player: "Ulrich Stark", score: 73 },{ player: "Wesley Verweij", score: 74 },
+        { player: "Paul Walsh", score: -20 },{ player: "Rowan Anderson", score: -15 },{ player: "Richard Dandridge", score: -14 },{ player: "Michael Hunt", score: -7 },{ player: "James Booth", score: 1 },{ player: "Thomas Fry", score: 3 },{ player: "Ian Armstrong", score: 11 },{ player: "Rowan Jelley", score: 14 },{ player: "Julien Koch", score: 15 },{ player: "Paul Nel", score: 20 },{ player: "George Nettleton", score: 27 },{ player: "Guy Jackson", score: 47 },{ player: "Ulrich Stark", score: 73 },{ player: "Wesley Verweij", score: 74 },
       ],
       masters: [
-        { player: "George Nettleton", score: -23 },{ player: "Ian Armstrong", score: -21 },{ player: "Rowan Jelley", score: -16 },{ player: "Rowan Anderson", score: -16 },{ player: "Ulrich Stark", score: -15 },{ player: "Mike Hunt", score: -5 },{ player: "Guy Jackson", score: -2 },{ player: "Julien Koch", score: 1 },{ player: "James Booth", score: 8 },{ player: "Wesley Verweij", score: 19 },{ player: "Paul Walsh", score: 25 },{ player: "Paul Nel", score: 27 },{ player: "Richard Dandridge", score: 30 },{ player: "Thomas Fry", score: 41 },
+        { player: "George Nettleton", score: -23 },{ player: "Ian Armstrong", score: -21 },{ player: "Rowan Jelley", score: -16 },{ player: "Rowan Anderson", score: -16 },{ player: "Ulrich Stark", score: -15 },{ player: "Michael Hunt", score: -5 },{ player: "Guy Jackson", score: -2 },{ player: "Julien Koch", score: 1 },{ player: "James Booth", score: 8 },{ player: "Wesley Verweij", score: 19 },{ player: "Paul Walsh", score: 25 },{ player: "Paul Nel", score: 27 },{ player: "Richard Dandridge", score: 30 },{ player: "Thomas Fry", score: 41 },
       ],
       pga: [
-        { player: "Julien Koch", score: -15 },{ player: "Mike Hunt", score: -10 },{ player: "Rowan Jelley", score: -7 },{ player: "Ian Armstrong", score: -6 },{ player: "Paul Walsh", score: -2 },{ player: "Richard Dandridge", score: -1 },{ player: "Paul Nel", score: 0 },{ player: "Rowan Anderson", score: 20 },{ player: "Wesley Verweij", score: 21 },{ player: "Guy Jackson", score: 26 },{ player: "Thomas Fry", score: 30 },{ player: "Ulrich Stark", score: 30 },{ player: "James Booth", score: 45 },{ player: "George Nettleton", score: 46 },
+        { player: "Julien Koch", score: -15 },{ player: "Michael Hunt", score: -10 },{ player: "Rowan Jelley", score: -7 },{ player: "Ian Armstrong", score: -6 },{ player: "Paul Walsh", score: -2 },{ player: "Richard Dandridge", score: -1 },{ player: "Paul Nel", score: 0 },{ player: "Rowan Anderson", score: 20 },{ player: "Wesley Verweij", score: 21 },{ player: "Guy Jackson", score: 26 },{ player: "Thomas Fry", score: 30 },{ player: "Ulrich Stark", score: 30 },{ player: "James Booth", score: 45 },{ player: "George Nettleton", score: 46 },
       ],
       usopen: [
-        { player: "Paul Nel", score: 21 },{ player: "Ian Armstrong", score: 23 },{ player: "Richard Dandridge", score: 23 },{ player: "Rowan Anderson", score: 24 },{ player: "Paul Walsh", score: 26 },{ player: "George Nettleton", score: 31 },{ player: "Wesley Verweij", score: 42 },{ player: "Mike Hunt", score: 44 },{ player: "Ulrich Stark", score: 48 },{ player: "Julien Koch", score: 52 },{ player: "Rowan Jelley", score: 54 },{ player: "James Booth", score: 59 },{ player: "Thomas Fry", score: 60 },{ player: "Guy Jackson", score: 82 },
+        { player: "Paul Nel", score: 21 },{ player: "Ian Armstrong", score: 23 },{ player: "Richard Dandridge", score: 23 },{ player: "Rowan Anderson", score: 24 },{ player: "Paul Walsh", score: 26 },{ player: "George Nettleton", score: 31 },{ player: "Wesley Verweij", score: 42 },{ player: "Michael Hunt", score: 44 },{ player: "Ulrich Stark", score: 48 },{ player: "Julien Koch", score: 52 },{ player: "Rowan Jelley", score: 54 },{ player: "James Booth", score: 59 },{ player: "Thomas Fry", score: 60 },{ player: "Guy Jackson", score: 82 },
       ],
       open: [
-        { player: "Guy Jackson", score: -34 },{ player: "Wesley Verweij", score: -32 },{ player: "George Nettleton", score: -32 },{ player: "Thomas Fry", score: -32 },{ player: "Mike Hunt", score: -31 },{ player: "James Booth", score: -31 },{ player: "Ulrich Stark", score: -29 },{ player: "Paul Walsh", score: -26 },{ player: "Julien Koch", score: -26 },{ player: "Paul Nel", score: -20 },{ player: "Rowan Jelley", score: -15 },{ player: "Rowan Anderson", score: -13 },{ player: "Richard Dandridge", score: -9 },{ player: "Ian Armstrong", score: -5 },
+        { player: "Guy Jackson", score: -34 },{ player: "Wesley Verweij", score: -32 },{ player: "George Nettleton", score: -32 },{ player: "Thomas Fry", score: -32 },{ player: "Michael Hunt", score: -31 },{ player: "James Booth", score: -31 },{ player: "Ulrich Stark", score: -29 },{ player: "Paul Walsh", score: -26 },{ player: "Julien Koch", score: -26 },{ player: "Paul Nel", score: -20 },{ player: "Rowan Jelley", score: -15 },{ player: "Rowan Anderson", score: -13 },{ player: "Richard Dandridge", score: -9 },{ player: "Ian Armstrong", score: -5 },
       ],
     },
     winners: {
       players: { first: "Paul Walsh", second: "Rowan Anderson" },
       masters: { first: "George Nettleton", second: "Ian Armstrong" },
-      pga: { first: "Julien Koch", second: "Mike Hunt" },
+      pga: { first: "Julien Koch", second: "Michael Hunt" },
       usopen: { first: "Paul Nel", second: "Ian Armstrong" },
       open: { first: "Guy Jackson", second: "Wesley Verweij" },
-      season: { first: "Mike Hunt", second: "Ian Armstrong" },
+      season: { first: "Michael Hunt", second: "Ian Armstrong" },
     },
   },
   2024: {
@@ -371,7 +371,7 @@ export default function Dashboard() {
       <div className="lk-shell">
         <header className="lk-header">
           <div className="lk-brand">
-            <div className="lk-brand-mark"><svg width="18" height="18" viewBox="0 0 14 14"><line x1="4" y1="2" x2="4" y2="12.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" /><path d="M4 2.5 L11 4.2 L4 6 Z" fill="white" /><circle cx="4" cy="12.5" r="1" fill="white" /></svg></div>
+            <img src="/rcgc-logo.png" alt="RCGC" style={{ height: 40, width: "auto" }} />
             <span className="lk-brand-name">RC Golf <em>Champs</em></span>
             <span className="lk-brand-sub">{new Date().getFullYear()} season</span>
           </div>
