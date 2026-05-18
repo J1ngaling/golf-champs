@@ -1239,9 +1239,6 @@ body::before {
     /* Total — prominent, right-padded */
     .lk-td-total { font-size: 15px; padding-right: 14px !important; }
     .lk-table thead th:nth-last-child(2) { padding-right: 14px; }
-    /* Hide the Δ column */
-    .lk-table th:last-child,
-    .lk-table td:last-child { display: none; }
   }
 }
 

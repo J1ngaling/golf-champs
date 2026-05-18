@@ -578,9 +578,6 @@ function StandingsView({ players, results, tournaments }) {
             <th className="right" style={{ width: 60 }}>
               Total
             </th>
-            <th className="center" style={{ width: 56 }}>
-              Δ
-            </th>
           </tr>
         </thead>
         <tbody>
@@ -632,9 +629,6 @@ function StandingsView({ players, results, tournaments }) {
                 </td>
               ))}
               <td className="lk-td-total">{s.totalRank}</td>
-              <td className="lk-td-move">
-                <Move delta={null} />
-              </td>
             </tr>
           ))}
         </tbody>
