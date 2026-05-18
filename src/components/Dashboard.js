@@ -567,11 +567,12 @@ function StandingsView({ players, results, tournaments }) {
             {tournaments.map((t) => (
               <th
                 key={t.id}
-                className="center"
+                className="center lk-th-major"
                 title={t.name}
-                style={{ width: 56 }}
+                style={{ width: 44 }}
               >
-                {t.short}
+                <span className="lk-th-major-text">{t.short}</span>
+                <span className="lk-th-major-icon"><Crest motif={t.motif} size={16} /></span>
               </th>
             ))}
             <th className="right" style={{ width: 60 }}>
@@ -1096,8 +1097,9 @@ function HistoryView() {
                 <th style={{ width: 48 }}>#</th>
                 <th>Player</th>
                 {yearTournaments.map((t) => (
-                  <th key={t.id} className="center" style={{ width: 50 }}>
-                    {t.short}
+                  <th key={t.id} className="center lk-th-major" title={t.name} style={{ width: 44 }}>
+                    <span className="lk-th-major-text">{t.short}</span>
+                    <span className="lk-th-major-icon"><Crest motif={t.motif} size={16} /></span>
                   </th>
                 ))}
                 <th className="right" style={{ width: 60 }}>

@@ -435,6 +435,9 @@ body::before {
   text-overflow: ellipsis;
 }
 .lk-td-major { text-align: center; padding: 12px 6px !important; }
+/* Major column header — text shown on desktop, icon shown on mobile */
+.lk-th-major-icon { display: none; }
+.lk-th-major-text { display: inline; }
 .lk-td-total {
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -1223,8 +1226,20 @@ body::before {
   .lk-td-total { font-size: 13px; }
   .lk-td-move { width: 36px; }
 
-  /* Hide the move column on the smallest screens — not needed at this density */
+  /* Mobile standings: icon-only major headers, compact columns, hide Δ */
   @media (max-width: 480px) {
+    /* Swap text headers for crest icons */
+    .lk-th-major-text { display: none; }
+    .lk-th-major-icon { display: inline-flex; align-items: center; justify-content: center; }
+    /* Super-compact major columns */
+    .lk-table th.lk-th-major { width: 30px !important; padding: 8px 2px !important; }
+    .lk-table td.lk-td-major  { width: 30px !important; padding: 8px 2px !important; }
+    /* Smaller rank badges to fit */
+    .lk-rank-badge { min-width: 18px; height: 18px; padding: 0 3px; font-size: 9px; border-radius: 4px; }
+    /* Total — prominent, right-padded */
+    .lk-td-total { font-size: 15px; padding-right: 14px !important; }
+    .lk-table thead th:nth-last-child(2) { padding-right: 14px; }
+    /* Hide the Δ column */
     .lk-table th:last-child,
     .lk-table td:last-child { display: none; }
   }
