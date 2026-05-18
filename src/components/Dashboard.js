@@ -79,7 +79,11 @@ const HISTORY = {
 
 function rankResults(entries) {
   if (!entries || entries.length === 0) return [];
-  const sorted = [...entries].sort((a, b) => a.score - b.score);
+  const valid = Array.isArray(entries)
+    ? entries.filter((e) => e != null && e.player != null)
+    : Object.values(entries).filter((e) => e != null && e.player != null);
+  if (valid.length === 0) return [];
+  const sorted = [...valid].sort((a, b) => a.score - b.score);
   let rank = 1;
   return sorted.map((r, i) => { if (i > 0 && r.score > sorted[i - 1].score) rank = i + 1; return { ...r, rank }; });
 }
@@ -172,8 +176,17 @@ function PrizesView({ players, results, tournaments, currency, buyIn, seasonBuyI
   return (
     <>
       <div className="lk-prize-section"><h3>Per-<em>major</em> purse</h3><p className="sub">{currency}{tournamentPot} per major · 70/30 split</p>
-        <div className="lk-prize-grid">{tournaments.map((t) => { const ranked = tRank[t.id]; const first = ranked?.find((r) => r.rank === 1); const second = ranked?.find((r) => r.rank === 2); return (
-          <div key={t.id} className="lk-prize-card"><div className="lk-prize-card-hd" style={{ display: "flex", alignItems: "center", gap: 8 }}><Crest motif={t.motif} size={22} />{t.name}</div>{ranked ? (<><div className="lk-prize-row"><span className="name">{first.player}</span><span className="lk-prize-amt gold">{currency}{(tournamentPot * 0.7).toFixed(0)}</span></div><div className="lk-prize-row"><span className="name">{second.player}</span><span className="lk-prize-amt">{currency}{(tournamentPot * 0.3).toFixed(0)}</span></div></>) : <p className="lk-prize-pending">Pending — {t.month}</p>}</div>
+        <div className="lk-prize-grid">{tournaments.map((t) => { const ranked = tRank[t.id];
+          const firstPlacers = ranked?.filter((r) => r.rank === 1) ?? [];
+          const secondPlacers = ranked?.filter((r) => r.rank === 2) ?? [];
+          const tiedFirst = firstPlacers.length > 1;
+          const firstShare = tiedFirst ? tournamentPot / firstPlacers.length : tournamentPot * 0.7;
+          const secondShare = secondPlacers.length > 0 ? (tournamentPot * 0.3) / secondPlacers.length : 0;
+          return (
+          <div key={t.id} className="lk-prize-card"><div className="lk-prize-card-hd" style={{ display: "flex", alignItems: "center", gap: 8 }}><Crest motif={t.motif} size={22} />{t.name}</div>{ranked && firstPlacers.length > 0 ? (<>
+            {firstPlacers.map((p) => <div key={p.player} className="lk-prize-row"><span className="name">{p.player}{tiedFirst && <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginLeft: 4 }}>T1</span>}</span><span className="lk-prize-amt gold">{currency}{firstShare.toFixed(0)}</span></div>)}
+            {!tiedFirst && secondPlacers.map((p) => <div key={p.player} className="lk-prize-row"><span className="name">{p.player}{secondPlacers.length > 1 && <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginLeft: 4 }}>T2</span>}</span><span className="lk-prize-amt">{currency}{secondShare.toFixed(0)}</span></div>)}
+          </>) : <p className="lk-prize-pending">Pending — {t.month}</p>}</div>
         ); })}</div>
       </div>
       <div className="lk-prize-section"><h3><em>Season</em> purse</h3><p className="sub">{currency}{seasonPot} on the line · 70/30 split</p>
