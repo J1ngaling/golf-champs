@@ -1253,7 +1253,7 @@ function HistoryView() {
   );
 }
 
-function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate }) {
+function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate, gcConfig, onGcUpdate }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(players.join("\n"));
   const tournamentPot = buyIn * players.length;
@@ -1370,6 +1370,44 @@ function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate }) {
         {tournamentPot} · Season pot: {currency}
         {seasonPot}
       </div>
+      <div style={{ borderTop: '1px solid hsl(var(--border))', marginTop: 20, paddingTop: 20 }}>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14 }}>Live pool (GolfChamps)</h3>
+        <div className="lk-settings-row">
+          <label className="lk-label">Tournament name</label>
+          <input
+            type="text"
+            className="lk-input"
+            style={{ width: '100%' }}
+            placeholder="e.g. U.S. Open"
+            value={gcConfig?.tournamentName || ''}
+            onChange={(e) => onGcUpdate({ tournamentName: e.target.value })}
+          />
+        </div>
+        <div className="lk-settings-row">
+          <label className="lk-label">Leaderboard ID</label>
+          <input
+            type="text"
+            className="lk-input"
+            style={{ width: '100%', fontFamily: 'monospace', fontSize: 12 }}
+            placeholder="e.g. d960ccc4-7b1e-491a-92ec-5a3e31433fcf"
+            value={gcConfig?.leaderboardId || ''}
+            onChange={(e) => onGcUpdate({ leaderboardId: e.target.value })}
+          />
+        </div>
+        <div className="lk-settings-row">
+          <label className="lk-label">Bearer token</label>
+          <textarea
+            className="lk-input"
+            style={{ width: '100%', minHeight: 72, fontFamily: 'monospace', fontSize: 11 }}
+            placeholder="Bearer eyJhbGci..."
+            value={gcConfig?.token || ''}
+            onChange={(e) => onGcUpdate({ token: e.target.value })}
+          />
+          <p style={{ fontSize: 11, color: 'hsl(var(--muted-foreground))', margin: '4px 0 0' }}>
+            Copy from browser DevTools → Network → any golfchamps request → Authorization header. Expires after ~4 days.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1435,6 +1473,159 @@ function PinDialog({ onClose, onLogin }) {
   );
 }
 
+function LiveView({ players }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastFetch, setLastFetch] = useState(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/golfchamps');
+      if (res.status === 404) {
+        setError('not_configured');
+        return;
+      }
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const json = await res.json();
+      setData(json);
+      setLastFetch(new Date());
+      setError(null);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 60000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+
+  const groupStandings = useMemo(() => {
+    if (!data?.participants) return [];
+    const playerMap = {};
+    players.forEach((p) => {
+      playerMap[p.toLowerCase()] = p;
+    });
+    const matched = data.participants.filter((p) => {
+      const full = `${p.firstName} ${p.lastName}`.toLowerCase();
+      return playerMap[full] != null;
+    });
+    return matched.sort((a, b) => a.rank - b.rank);
+  }, [data, players]);
+
+  const unmatched = useMemo(() => {
+    if (!data?.participants) return players;
+    const found = new Set(
+      data.participants.map((p) => `${p.firstName} ${p.lastName}`.toLowerCase())
+    );
+    return players.filter((p) => !found.has(p.toLowerCase()));
+  }, [data, players]);
+
+  if (loading && !data)
+    return (
+      <div className="lk-empty">
+        <p>Loading live standings…</p>
+      </div>
+    );
+
+  if (error === 'not_configured')
+    return (
+      <div className="lk-empty">
+        <p>Live mode not configured</p>
+        <span>Ask the admin to paste the GolfChamps leaderboard ID and token in Settings.</span>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="lk-empty">
+        <p>Could not load live data</p>
+        <span>{error}</span>
+        <button className="lk-btn lk-btn-outline lk-btn-sm" style={{ marginTop: 12 }} onClick={fetchData}>
+          Retry
+        </button>
+      </div>
+    );
+
+  return (
+    <div className="lk-card">
+      <div className="lk-card-hd">
+        <div>
+          <h3 className="lk-card-title">
+            <em>{data.tournamentName || 'Live'}</em> Standings
+          </h3>
+          <p className="lk-card-desc">
+            Live pool rankings · updated{' '}
+            {lastFetch ? lastFetch.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+          </p>
+        </div>
+        <button className="lk-btn lk-btn-ghost lk-btn-sm" onClick={fetchData} disabled={loading}>
+          {loading ? '…' : 'Refresh'}
+        </button>
+      </div>
+      <table className="lk-table">
+        <thead>
+          <tr>
+            <th style={{ width: 48 }}>#</th>
+            <th>Player</th>
+            <th className="right" style={{ width: 72 }}>Score</th>
+            <th className="right" style={{ width: 72 }}>Pool rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          {groupStandings.map((p, i) => {
+            const scoreNum = parseInt(p.score, 10);
+            return (
+              <tr key={p.id} className={i < 3 ? `podium-${i + 1}` : ''}>
+                <td className="lk-td-rank">{i + 1}</td>
+                <td>
+                  <div className="lk-td-player">
+                    <div className="lk-td-player-name">
+                      {p.firstName} {p.lastName}
+                      {p.myself && (
+                        <span style={{ fontSize: 10, color: 'hsl(var(--muted-foreground))', marginLeft: 6 }}>you</span>
+                      )}
+                    </div>
+                  </div>
+                </td>
+                <td className={`lk-result-score right ${scoreNum < 0 ? 'under' : ''}`}>
+                  {formatScore(scoreNum)}
+                </td>
+                <td className="right" style={{ color: 'hsl(var(--muted-foreground))', fontSize: 13 }}>
+                  {p.rank}
+                  {data.participants.filter((x) => x.rank === p.rank).length > 1 ? ' T' : ''}
+                </td>
+              </tr>
+            );
+          })}
+          {unmatched.map((name) => (
+            <tr key={name} style={{ opacity: 0.45 }}>
+              <td className="lk-td-rank">—</td>
+              <td>
+                <div className="lk-td-player">
+                  <div className="lk-td-player-name">{name}</div>
+                </div>
+              </td>
+              <td className="right lk-dash">—</td>
+              <td className="right lk-dash">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {data.participants && (
+        <p style={{ padding: '8px 22px', fontSize: 12, color: 'hsl(var(--muted-foreground))' }}>
+          {data.participants.length} total pool participants
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [players, setPlayers] = useState(DEFAULT_PLAYERS);
   const [results, setResults] = useState({});
@@ -1448,6 +1639,7 @@ export default function Dashboard() {
   const [admin, setAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [theme, setTheme] = useState("light");
+  const [gcConfig, setGcConfig] = useState(null);
 
   useEffect(() => {
     setAdmin(isAdmin());
@@ -1469,6 +1661,7 @@ export default function Dashboard() {
       }
       setLoaded(true);
     });
+    listen("golfchamps", (v) => setGcConfig(v || null));
     return () => unsubs.forEach((u) => u());
   }, []);
 
@@ -1514,6 +1707,12 @@ export default function Dashboard() {
         seasonBuyIn: patch.seasonBuyIn ?? seasonBuyIn,
         currency: patch.currency ?? currency,
       });
+  };
+
+  const updateGcConfig = (patch) => {
+    const next = { ...(gcConfig || {}), ...patch };
+    setGcConfig(next);
+    persist("golfchamps", next);
   };
 
   const handleLogin = () => {
@@ -1673,6 +1872,8 @@ export default function Dashboard() {
               buyIn={buyIn}
               seasonBuyIn={seasonBuyIn}
               onUpdate={updateConfig}
+              gcConfig={gcConfig}
+              onGcUpdate={updateGcConfig}
             />
           )}
 
@@ -1682,6 +1883,7 @@ export default function Dashboard() {
               { id: "tournaments", label: "Majors", badge: `${completed}/4` },
               { id: "prizes", label: "Purse" },
               { id: "history", label: "History" },
+              ...(gcConfig?.leaderboardId ? [{ id: "live", label: "🔴 Live" }] : []),
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -1735,6 +1937,7 @@ export default function Dashboard() {
               />
             )}
             {view === "history" && <HistoryView />}
+            {view === "live" && <LiveView players={players} />}
           </main>
         </div>
       </div>
