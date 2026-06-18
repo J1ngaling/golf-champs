@@ -1636,6 +1636,8 @@ function LiveView({ players }) {
                                     color:
                                       score < 0
                                         ? 'hsl(var(--success, 142 76% 36%))'
+                                        : score > 0
+                                        ? 'hsl(var(--destructive, 0 72% 51%))'
                                         : 'hsl(var(--muted-foreground))',
                                   }}
                                 >
