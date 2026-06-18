@@ -8,6 +8,7 @@ import {
   useRef,
   createContext,
   useContext,
+  Fragment,
 } from "react";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "@/lib/firebase";
@@ -1581,7 +1582,7 @@ function LiveView({ players }) {
           {groupStandings.map((p, i) => {
             const scoreNum = parseInt(p.score, 10);
             return (
-              <React.Fragment key={p.id}>
+              <Fragment key={p.id}>
                 <tr className={i < 3 ? `podium-${i + 1}` : ''}>
                   <td className="lk-td-rank">{i + 1}</td>
                   <td>
@@ -1625,7 +1626,7 @@ function LiveView({ players }) {
                     </td>
                   </tr>
                 )}
-              </React.Fragment>
+              </Fragment>
             );
           })}
           {unmatched.map((name) => (
