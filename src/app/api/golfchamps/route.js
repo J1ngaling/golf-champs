@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const FIREBASE_URL = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL;
+const GC_API = 'https://api.golfchamps.net';
 
 export async function GET() {
   try {
@@ -13,15 +14,14 @@ export async function GET() {
       return NextResponse.json({ error: 'not_configured' }, { status: 404 });
     }
 
+    const headers = {
+      Authorization: config.token,
+      'Content-Type': 'application/json',
+    };
+
     const gcRes = await fetch(
-      `https://api.golfchamps.net/leaderboards/show/${config.leaderboardId}?numUsers=1000000`,
-      {
-        headers: {
-          Authorization: config.token,
-          'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
-      }
+      `${GC_API}/leaderboards/show/${config.leaderboardId}?numUsers=1000000`,
+      { headers, cache: 'no-store' }
     );
 
     if (!gcRes.ok) {
@@ -32,8 +32,25 @@ export async function GET() {
     }
 
     const participants = await gcRes.json();
+
+    // Fetch picks for all participants in parallel
+    const withPicks = await Promise.all(
+      participants.map(async (p) => {
+        try {
+          const entriesRes = await fetch(
+            `${GC_API}/entries?userId=${p.id}`,
+            { headers, cache: 'no-store' }
+          );
+          const picks = entriesRes.ok ? await entriesRes.json() : [];
+          return { ...p, picks };
+        } catch {
+          return { ...p, picks: [] };
+        }
+      })
+    );
+
     return NextResponse.json({
-      participants,
+      participants: withPicks,
       tournamentName: config.tournamentName || null,
       fetchedAt: new Date().toISOString(),
     });

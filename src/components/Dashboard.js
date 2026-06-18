@@ -1581,26 +1581,51 @@ function LiveView({ players }) {
           {groupStandings.map((p, i) => {
             const scoreNum = parseInt(p.score, 10);
             return (
-              <tr key={p.id} className={i < 3 ? `podium-${i + 1}` : ''}>
-                <td className="lk-td-rank">{i + 1}</td>
-                <td>
-                  <div className="lk-td-player">
-                    <div className="lk-td-player-name">
-                      {p.firstName} {p.lastName}
-                      {p.myself && (
-                        <span style={{ fontSize: 10, color: 'hsl(var(--muted-foreground))', marginLeft: 6 }}>you</span>
-                      )}
+              <React.Fragment key={p.id}>
+                <tr className={i < 3 ? `podium-${i + 1}` : ''}>
+                  <td className="lk-td-rank">{i + 1}</td>
+                  <td>
+                    <div className="lk-td-player">
+                      <div className="lk-td-player-name">
+                        {p.firstName} {p.lastName}
+                        {p.myself && (
+                          <span style={{ fontSize: 10, color: 'hsl(var(--muted-foreground))', marginLeft: 6 }}>you</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className={`lk-result-score right ${scoreNum < 0 ? 'under' : ''}`}>
-                  {formatScore(scoreNum)}
-                </td>
-                <td className="right" style={{ color: 'hsl(var(--muted-foreground))', fontSize: 13 }}>
-                  {p.rank}
-                  {data.participants.filter((x) => x.rank === p.rank).length > 1 ? ' T' : ''}
-                </td>
-              </tr>
+                  </td>
+                  <td className={`lk-result-score right ${scoreNum < 0 ? 'under' : ''}`}>
+                    {formatScore(scoreNum)}
+                  </td>
+                  <td className="right" style={{ color: 'hsl(var(--muted-foreground))', fontSize: 13 }}>
+                    {p.rank}
+                    {data.participants.filter((x) => x.rank === p.rank).length > 1 ? ' T' : ''}
+                  </td>
+                </tr>
+                {p.picks && p.picks.length > 0 && (
+                  <tr style={{ background: 'hsl(var(--muted) / 0.3)' }}>
+                    <td />
+                    <td colSpan={3} style={{ padding: '4px 12px 8px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px' }}>
+                        {p.picks.map((pick) => {
+                          const toPar = pick.ScoreDetails?.Totals?.totalToPar;
+                          const score = toPar !== undefined ? parseInt(toPar, 10) : null;
+                          return (
+                            <span key={pick.id} style={{ fontSize: 12, color: 'hsl(var(--muted-foreground))' }}>
+                              {pick.first_name} {pick.last_name}
+                              {score !== null && (
+                                <span style={{ marginLeft: 4, fontWeight: 600, color: score < 0 ? 'hsl(var(--success, 142 76% 36%))' : 'inherit' }}>
+                                  {score === 0 ? 'E' : score > 0 ? `+${score}` : score}
+                                </span>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             );
           })}
           {unmatched.map((name) => (
