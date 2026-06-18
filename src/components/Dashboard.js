@@ -1606,20 +1606,43 @@ function LiveView({ players }) {
                 {p.picks && p.picks.length > 0 && (
                   <tr style={{ background: 'hsl(var(--muted) / 0.3)' }}>
                     <td />
-                    <td colSpan={3} style={{ padding: '4px 12px 8px' }}>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px' }}>
+                    <td colSpan={3} style={{ padding: '2px 12px 10px' }}>
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                          gap: '2px 18px',
+                        }}
+                      >
                         {p.picks.map((pick) => {
                           const toPar = pick.ScoreDetails?.Totals?.totalToPar;
                           const score = toPar !== undefined ? parseInt(toPar, 10) : null;
+                          const name = `${(pick.first_name || '').charAt(0)}. ${pick.last_name}`;
                           return (
-                            <span key={pick.id} style={{ fontSize: 12, color: 'hsl(var(--muted-foreground))' }}>
-                              {pick.first_name} {pick.last_name}
+                            <div
+                              key={pick.id}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                fontSize: 13,
+                                padding: '2px 0',
+                              }}
+                            >
+                              <span style={{ color: 'hsl(var(--muted-foreground))' }}>{name}</span>
                               {score !== null && (
-                                <span style={{ marginLeft: 4, fontWeight: 600, color: score < 0 ? 'hsl(var(--success, 142 76% 36%))' : 'inherit' }}>
+                                <span
+                                  style={{
+                                    fontWeight: 600,
+                                    color:
+                                      score < 0
+                                        ? 'hsl(var(--success, 142 76% 36%))'
+                                        : 'hsl(var(--muted-foreground))',
+                                  }}
+                                >
                                   {score === 0 ? 'E' : score > 0 ? `+${score}` : score}
                                 </span>
                               )}
-                            </span>
+                            </div>
                           );
                         })}
                       </div>
