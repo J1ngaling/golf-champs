@@ -1906,10 +1906,10 @@ export default function Dashboard() {
           <div className="lk-tabs-list" role="tablist">
             {[
               { id: "standings", label: "Standings" },
+              ...(gcConfig?.leaderboardId ? [{ id: "live", label: "🔴 Live" }] : []),
               { id: "tournaments", label: "Majors", badge: `${completed}/4` },
               { id: "prizes", label: "Purse" },
               { id: "history", label: "History" },
-              ...(gcConfig?.leaderboardId ? [{ id: "live", label: "🔴 Live" }] : []),
             ].map((tab) => (
               <button
                 key={tab.id}
