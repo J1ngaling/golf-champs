@@ -1254,7 +1254,7 @@ function HistoryView() {
   );
 }
 
-function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate, gcConfig, onGcUpdate }) {
+function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate, gcConfig, onGcUpdate, tournaments }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(players.join("\n"));
   const tournamentPot = buyIn * players.length;
@@ -1374,6 +1374,23 @@ function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate, gcCon
       <div style={{ borderTop: '1px solid hsl(var(--border))', marginTop: 20, paddingTop: 20 }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 14 }}>Live pool (GolfChamps)</h3>
         <div className="lk-settings-row">
+          <label className="lk-label">Syncs to major</label>
+          <select
+            className="lk-input"
+            style={{ width: '100%' }}
+            value={gcConfig?.tournamentId || ''}
+            onChange={(e) => onGcUpdate({ tournamentId: e.target.value || null })}
+          >
+            <option value="">— Select —</option>
+            {tournaments.map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+          <p style={{ fontSize: 11, color: 'hsl(var(--muted-foreground))', margin: '4px 0 0' }}>
+            Which scorecard the &quot;Sync to scorecard&quot; button on the Live tab writes into.
+          </p>
+        </div>
+        <div className="lk-settings-row">
           <label className="lk-label">Tournament name</label>
           <input
             type="text"
@@ -1488,11 +1505,12 @@ function PinDialog({ onClose, onLogin }) {
   );
 }
 
-function LiveView({ players, gcConfig }) {
+function LiveView({ players, gcConfig, admin, results, tournaments, onSave }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastFetch, setLastFetch] = useState(null);
+  const toast = useToast();
 
   const fetchData = useCallback(async () => {
     try {
@@ -1555,6 +1573,32 @@ function LiveView({ players, gcConfig }) {
     return false;
   }, [cutLine]);
 
+  const targetTournament = useMemo(
+    () => tournaments?.find((t) => t.id === gcConfig?.tournamentId) || null,
+    [tournaments, gcConfig]
+  );
+
+  const handleSync = () => {
+    if (!targetTournament) return;
+    const entries = groupStandings.map((p) => {
+      const player = players.find(
+        (pl) => pl.toLowerCase() === `${p.firstName} ${p.lastName}`.toLowerCase()
+      );
+      return { player, score: parseInt(p.score, 10) };
+    });
+    const alreadyHasScores = !!results?.[targetTournament.id];
+    if (
+      alreadyHasScores &&
+      !window.confirm(
+        `${targetTournament.name} already has saved scores. Overwrite them with the current live standings?`
+      )
+    ) {
+      return;
+    }
+    onSave(targetTournament.id, entries);
+    if (toast) toast(`${targetTournament.short} scorecard synced from live`);
+  };
+
   // Worst score among all picks that made the cut — used as replacement score
   const worstMadeCutScore = useMemo(() => {
     if (!data?.participants) return null;
@@ -1607,9 +1651,16 @@ function LiveView({ players, gcConfig }) {
             {lastFetch ? lastFetch.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
           </p>
         </div>
-        <button className="lk-btn lk-btn-ghost lk-btn-sm" onClick={fetchData} disabled={loading}>
-          {loading ? '…' : 'Refresh'}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {admin && targetTournament && (
+            <button className="lk-btn lk-btn-outline lk-btn-sm" onClick={handleSync}>
+              Sync to scorecard
+            </button>
+          )}
+          <button className="lk-btn lk-btn-ghost lk-btn-sm" onClick={fetchData} disabled={loading}>
+            {loading ? '…' : 'Refresh'}
+          </button>
+        </div>
       </div>
       <table className="lk-table">
         <thead>
@@ -1988,6 +2039,7 @@ export default function Dashboard() {
               onUpdate={updateConfig}
               gcConfig={gcConfig}
               onGcUpdate={updateGcConfig}
+              tournaments={TOURNAMENTS}
             />
           )}
 
@@ -2051,7 +2103,16 @@ export default function Dashboard() {
               />
             )}
             {view === "history" && <HistoryView />}
-            {view === "live" && <LiveView players={players} gcConfig={gcConfig} />}
+            {view === "live" && (
+              <LiveView
+                players={players}
+                gcConfig={gcConfig}
+                admin={admin}
+                results={results}
+                tournaments={TOURNAMENTS}
+                onSave={handleSave}
+              />
+            )}
           </main>
         </div>
       </div>
