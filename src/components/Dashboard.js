@@ -1408,6 +1408,20 @@ function SettingsDrawer({ players, currency, buyIn, seasonBuyIn, onUpdate, gcCon
             Copy from browser DevTools → Network → any golfchamps request → Authorization header. Expires after ~4 days.
           </p>
         </div>
+        <div className="lk-settings-row">
+          <label className="lk-label">Cut line (to par)</label>
+          <input
+            type="number"
+            className="lk-input"
+            style={{ width: 80 }}
+            placeholder="e.g. 4"
+            value={gcConfig?.cutLine ?? ''}
+            onChange={(e) => onGcUpdate({ cutLine: e.target.value === '' ? null : Number(e.target.value) })}
+          />
+          <p style={{ fontSize: 11, color: 'hsl(var(--muted-foreground))', margin: '4px 0 0' }}>
+            Picks over this score (or flagged as cut by GolfChamps) miss the cut and receive the worst made-cut score.
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -1474,7 +1488,7 @@ function PinDialog({ onClose, onLogin }) {
   );
 }
 
-function LiveView({ players }) {
+function LiveView({ players, gcConfig }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -1526,6 +1540,34 @@ function LiveView({ players }) {
     );
     return players.filter((p) => !found.has(p.toLowerCase()));
   }, [data, players]);
+
+  const cutLine = gcConfig?.cutLine ?? null;
+
+  // Determine if a pick missed the cut — prefer API status field, fall back to score vs cutLine
+  const pickMissedCut = useCallback((pick) => {
+    const status = (pick.status || pick.ScoreDetails?.Totals?.status || '').toUpperCase();
+    if (status === 'CUT' || status === 'MC' || status === 'MDF') return true;
+    if (cutLine != null) {
+      const toPar = pick.ScoreDetails?.Totals?.totalToPar;
+      const score = toPar !== undefined ? parseInt(toPar, 10) : null;
+      if (score !== null && !isNaN(score) && score > cutLine) return true;
+    }
+    return false;
+  }, [cutLine]);
+
+  // Worst score among all picks that made the cut — used as replacement score
+  const worstMadeCutScore = useMemo(() => {
+    if (!data?.participants) return null;
+    const scores = data.participants
+      .flatMap((p) => p.picks || [])
+      .filter((pick) => !pickMissedCut(pick))
+      .map((pick) => {
+        const v = pick.ScoreDetails?.Totals?.totalToPar;
+        return v !== undefined ? parseInt(v, 10) : NaN;
+      })
+      .filter((s) => !isNaN(s));
+    return scores.length > 0 ? Math.max(...scores) : null;
+  }, [data, pickMissedCut]);
 
   if (loading && !data)
     return (
@@ -1617,6 +1659,8 @@ function LiveView({ players }) {
                         {p.picks.map((pick) => {
                           const toPar = pick.ScoreDetails?.Totals?.totalToPar;
                           const score = toPar !== undefined ? parseInt(toPar, 10) : null;
+                          const cut = pickMissedCut(pick);
+                          const displayScore = cut && worstMadeCutScore != null ? worstMadeCutScore : score;
                           const name = `${(pick.first_name || '').charAt(0)}. ${pick.last_name}`;
                           return (
                             <div
@@ -1624,24 +1668,43 @@ function LiveView({ players }) {
                               style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
+                                alignItems: 'center',
                                 fontSize: 13,
                                 padding: '2px 0',
+                                opacity: cut ? 0.65 : 1,
                               }}
                             >
-                              <span style={{ color: 'hsl(var(--muted-foreground))' }}>{name}</span>
-                              {score !== null && (
+                              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                {cut && (
+                                  <span style={{
+                                    fontSize: 9,
+                                    fontWeight: 700,
+                                    letterSpacing: '0.06em',
+                                    padding: '1px 4px',
+                                    borderRadius: 3,
+                                    background: 'hsl(0 72% 51% / 0.12)',
+                                    color: 'hsl(0 72% 51%)',
+                                  }}>CUT</span>
+                                )}
+                                <span style={{
+                                  color: 'hsl(var(--muted-foreground))',
+                                  textDecoration: cut ? 'line-through' : 'none',
+                                }}>{name}</span>
+                              </span>
+                              {displayScore !== null && (
                                 <span
                                   style={{
                                     fontWeight: 600,
-                                    color:
-                                      score < 0
-                                        ? 'hsl(var(--success, 142 76% 36%))'
-                                        : score > 0
-                                        ? 'hsl(var(--destructive, 0 72% 51%))'
-                                        : 'hsl(var(--muted-foreground))',
+                                    color: cut
+                                      ? 'hsl(var(--muted-foreground))'
+                                      : displayScore < 0
+                                      ? 'hsl(var(--success, 142 76% 36%))'
+                                      : displayScore > 0
+                                      ? 'hsl(var(--destructive, 0 72% 51%))'
+                                      : 'hsl(var(--muted-foreground))',
                                   }}
                                 >
-                                  {score === 0 ? 'E' : score > 0 ? `+${score}` : score}
+                                  {displayScore === 0 ? 'E' : displayScore > 0 ? `+${displayScore}` : displayScore}
                                 </span>
                               )}
                             </div>
@@ -1988,7 +2051,7 @@ export default function Dashboard() {
               />
             )}
             {view === "history" && <HistoryView />}
-            {view === "live" && <LiveView players={players} />}
+            {view === "live" && <LiveView players={players} gcConfig={gcConfig} />}
           </main>
         </div>
       </div>
